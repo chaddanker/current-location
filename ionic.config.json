@@ -1,0 +1,7 @@
+{
+  "name": "current-location",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
