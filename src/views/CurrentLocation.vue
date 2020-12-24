@@ -14,14 +14,19 @@
           <ion-icon :icon="locationOutline"></ion-icon>
         </ion-fab-button>
       </ion-fab>
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed" @click="reset" v-else>
+        <ion-fab-button class="ion-margin-vertical">
+          <ion-icon :icon="refresh"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
 
 <script>
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, loadingController } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { locationOutline } from 'ionicons/icons';
+import { locationOutline, refresh } from 'ionicons/icons';
 import { Plugins } from '@capacitor/core';
 
 const { Geolocation } = Plugins;
@@ -35,10 +40,13 @@ export default defineComponent({
   data() {
     return {
       locationOutline,
+      refresh,
       coordinates: {}
     }
   },
   mounted() {
+    this.presentLoading();
+    document.body.classList.toggle('dark');
     this.buildMap([22.9375, -30.5595], 3);
   },
   methods: {
@@ -68,8 +76,26 @@ export default defineComponent({
       const position = await this.getCurrentPosition();
       const coords = [position.coords.longitude, position.coords.latitude];
 
-      this.buildMap(coords, 10);
-    }
+      this.buildMap(coords, 12);
+    },
+    reset() {
+      this.coordinates = {};
+      this.buildMap([22.9375, -30.5595], 3);
+    },
+    async presentLoading() {
+      const loading = await loadingController
+        .create({
+          cssClass: 'my-custom-class',
+          message: 'Please wait...',
+          duration: this.timeout,
+        });
+
+      await loading.present();
+
+      setTimeout(function() {
+        loading.dismiss()
+      }, 2000);
+    },
   },
 });
 </script>
@@ -84,24 +110,6 @@ export default defineComponent({
   transform: translateY(-50%);
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-  
-  color: #8c8c8c;
-  
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
-
 #map { 
   width: 100%; 
   height: 100vh;
@@ -109,7 +117,17 @@ export default defineComponent({
 
 h1 {
   position: relative;
-  top: 7em
+  top: 30vh;
+  color: #ffffff;
+}
+
+@media screen and (max-width: 600px){
+  h1 {
+    display: none;
+  }
+  ion-fab-button {
+    margin-bottom: 2em;
+  }
 }
 
 </style>
