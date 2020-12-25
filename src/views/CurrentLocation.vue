@@ -14,7 +14,7 @@
           <ion-icon :icon="moon"></ion-icon>
         </ion-fab-button>
       </ion-fab>
-      <ion-fab vertical="bottom" horizontal="center" slot="fixed" @click="buttonClick" v-if="!hasPosition">
+      <ion-fab vertical="bottom" horizontal="center" slot="fixed" @click="locateButtonClick" v-if="!hasPosition">
         <ion-fab-button class="ion-margin-vertical">
           <ion-icon :icon="locationOutline"></ion-icon>
         </ion-fab-button>
@@ -32,12 +32,10 @@
 import { IonContent, IonPage, loadingController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { locationOutline, refresh, moon } from 'ionicons/icons';
-import { Plugins } from '@capacitor/core';
-import { io } from 'socket.io-client';
-import keys from '../config/keys';
 
-const { Geolocation } = Plugins;
-const socket = io(keys.socketUri);
+import { buildMap } from '../utils/useMapBox';
+import { getCurrentPosition } from '../utils/useLocation';
+import { socket } from '../utils/useSocket';
 
 export default defineComponent({
   name: 'Home',
@@ -61,43 +59,22 @@ export default defineComponent({
   mounted() {
     this.presentLoading('Please wait...', 2000);
     document.body.classList.toggle('dark');
-    this.buildMap(this.southAfricaCenter, 3, this.darkMode);
+    buildMap(this.southAfricaCenter, 3, this.darkMode, this.hasPosition);
   },
   methods: {
-    async getCurrentPosition() {
-      const coordinates = await Geolocation.getCurrentPosition();
+    async locateButtonClick() {
+      const position = await getCurrentPosition();
       this.hasPosition = true;
-      this.coords = coordinates.coords;
-      return coordinates;
-    },
-    buildMap(center, zoom, isDark) {
-      window.mapboxgl.accessToken = keys.mapBoxKey;
-      const map = new window.mapboxgl.Map({
-        container: 'map', // container id
-        style: `mapbox://styles/mapbox/${isDark ? 'dark' : 'light'}-v10`, // style URL
-        center, // starting position [lng, lat]
-        zoom // starting zoom
-      });    
-
-      map.on('load', () => {
-        map.resize();
-      });
-
-      this.hasPosition ? new window.mapboxgl.Marker()
-      .setLngLat(center)
-      .addTo(map) : null;
-    },
-    async buttonClick() {
-      const position = await this.getCurrentPosition();
-      const coords = [position.coords.longitude, position.coords.latitude];
-      socket.emit('location', coords);
+      this.coords = position.coords;
+      const center = [position.coords.longitude, position.coords.latitude];
+      socket.emit('location', center);
       this.presentLoading('locating...', 1000);
-      this.buildMap(coords, 12, this.darkMode);
+      buildMap(center, 12, this.darkMode, this.hasPosition);
     },
     reset() {
       this.presentLoading('re-initializing...', 1500);
       this.hasPosition = false;
-      this.buildMap(this.southAfricaCenter, 3, this.darkMode);
+      buildMap(this.southAfricaCenter, 3, this.darkMode, this.hasPosition);
       setTimeout(() => {
         document.querySelector('#heading').style.color = this.darkMode ? '#ffffff' : '#000000';
       }, 800);
@@ -130,7 +107,7 @@ export default defineComponent({
         center = [this.coords.longitude, this.coords.latitude];
         zoom = 12; 
       }
-      this.buildMap(center, zoom, this.darkMode);
+      buildMap(center, zoom, this.darkMode, this.hasPosition);
     },
   },
 });
@@ -155,13 +132,14 @@ export default defineComponent({
 }
 
 #map { 
+  position: absolute;
   width: 100%; 
   height: 100vh;
 }
 
 h1 {
   position: relative;
-  top: 30vh;
+  top: 31.5vh;
   color: #000000;
 }
 
