@@ -33,7 +33,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "src/config/keys.js", "src/utils/useLocation.js", "src/utils/useSocket.js", "src/utils/useMapBox.js"  ],
   "exclude": [
     "node_modules"
   ]

@@ -9,6 +9,11 @@
           </h1>
         </div>
       </div>
+      <ion-card class="locationInfo" v-if="hasPosition">
+        <ion-card-content>
+          {{ address }}
+        </ion-card-content>
+      </ion-card>
       <ion-fab vertical="top" horizontal="end" slot="fixed" @click="changeTheme">
         <ion-fab-button class="ion-margin-vertical" color="dark">
           <ion-icon :icon="moon"></ion-icon>
@@ -29,11 +34,11 @@
 </template>
 
 <script>
-import { IonContent, IonPage, loadingController } from '@ionic/vue';
+import { IonContent, IonPage, loadingController, IonCard, IonCardContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { locationOutline, refresh, moon } from 'ionicons/icons';
 
-import { buildMap } from '../utils/useMapBox';
+import { buildMap, getAddress } from '../utils/useMapBox';
 import { getCurrentPosition } from '../utils/useLocation';
 import { socket } from '../utils/useSocket';
 
@@ -42,6 +47,8 @@ export default defineComponent({
   components: {
     IonContent,
     IonPage,
+    IonCard,
+    IonCardContent
   },
   data() {
     return {
@@ -53,12 +60,13 @@ export default defineComponent({
       darkMode: false,
       southAfricaCenter: [22.9375, -30.5595],
       isConnected: false,
-      socketMessage: ''
+      socketMessage: '',
+      address: ''
     }
   },
   mounted() {
     this.presentLoading('Please wait...', 2000);
-    document.body.classList.toggle('dark');
+    document.body.classList.remove('dark');
     buildMap(this.southAfricaCenter, 3, this.darkMode, this.hasPosition);
   },
   methods: {
@@ -66,10 +74,11 @@ export default defineComponent({
       const position = await getCurrentPosition();
       this.hasPosition = true;
       this.coords = position.coords;
+      this.address = await getAddress(this.coords);
       const center = [position.coords.longitude, position.coords.latitude];
       socket.emit('location', center);
       this.presentLoading('locating...', 1000);
-      buildMap(center, 12, this.darkMode, this.hasPosition);
+      buildMap(center, 13, this.darkMode, this.hasPosition);
     },
     reset() {
       this.presentLoading('re-initializing...', 1500);
@@ -143,12 +152,22 @@ h1 {
   color: #000000;
 }
 
+.locationInfo {
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  font-weight: bold;
+}
+
 @media screen and (max-width: 600px){
   h1 {
     display: none;
   }
   ion-fab-button {
     margin-bottom: 2em;
+  }
+  .locationInfo {
+    width: 60vw;
   }
 }
 
