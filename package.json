@@ -14,8 +14,11 @@
     "@ionic/vue": "^5.4.0",
     "@ionic/vue-router": "^5.4.0",
     "core-js": "^3.6.5",
+    "socket.io": "^3.0.4",
+    "socket.io-client": "^3.0.4",
     "vue": "^3.0.0-0",
-    "vue-router": "^4.0.0-0"
+    "vue-router": "^4.0.0-0",
+    "vue-socket.io": "^3.0.10"
   },
   "devDependencies": {
     "@capacitor/cli": "2.4.5",
