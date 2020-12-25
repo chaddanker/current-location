@@ -1,8 +1,9 @@
 import keys from '../config/keys';
+import mapboxgl from 'mapbox-gl';
 
 export const buildMap = (center, zoom, isDark, hasPosition) => {
-    window.mapboxgl.accessToken = keys.mapBoxKey;
-    const map = new window.mapboxgl.Map({
+    mapboxgl.accessToken = keys.mapBoxKey;
+    const map = new mapboxgl.Map({
       container: 'map', // container id
       style: `mapbox://styles/mapbox/${isDark ? 'dark' : 'light'}-v10`, // style URL
       center, // starting position [lng, lat]
@@ -13,7 +14,7 @@ export const buildMap = (center, zoom, isDark, hasPosition) => {
       map.resize();
     });
 
-    hasPosition ? new window.mapboxgl.Marker()
+    hasPosition ? new mapboxgl.Marker()
     .setLngLat(center)
     .addTo(map) : null;
 };
