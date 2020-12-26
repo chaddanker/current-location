@@ -7,13 +7,11 @@ export const addMarker = (pos, map) => {
   const el = document.createElement('div');
   el.className = 'marker';
   el.classList.add('pulse');
-  console.log(el);
 
   // make a marker for each feature and add to the map
   new mapboxgl.Marker(el)
     .setLngLat(pos)
     .addTo(map);
-    console.log(map);
 }
 
 export const getMap = (center, zoom, isDark, container) => {
