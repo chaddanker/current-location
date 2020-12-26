@@ -88,6 +88,8 @@ export default defineComponent({
     },
     reset() {
       clearInterval(this.intervalID);
+      const elem = document.querySelector('.marker');
+      elem.parentNode.removeChild(elem);
       this.presentLoading('re-initializing...', 1500);
       this.hasPosition = false;
       this.map = getMap(this.southAfricaCenter, 3, this.darkMode, 'map');
@@ -124,7 +126,11 @@ export default defineComponent({
         zoom = 12; 
       }
       this.map = getMap(center, zoom, this.darkMode, 'map');
-      this.hasPosition ? addMarker(center, this.map) : null;
+      if(this.hasPosition) {
+        const elem = document.querySelector('.marker');
+        elem.parentNode.removeChild(elem);
+        addMarker(center, this.map);
+      }
     },
     startTracking() {
       this.intervalID = setInterval( async () => {
