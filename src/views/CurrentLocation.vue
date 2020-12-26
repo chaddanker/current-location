@@ -38,7 +38,7 @@ import { IonContent, IonPage, loadingController, IonCard, IonCardContent } from 
 import { defineComponent } from 'vue';
 import { locationOutline, refresh, moon } from 'ionicons/icons';
 
-import { buildMap, getAddress } from '../utils/useMapBox';
+import { buildMap, getAddress, addMarker } from '../utils/useMapBox';
 import { getCurrentPosition } from '../utils/useLocation';
 import { socket } from '../utils/useSocket';
 
@@ -91,7 +91,7 @@ export default defineComponent({
     async presentLoading(message, duration) {
       const loading = await loadingController
         .create({
-          cssClass: 'my-custom-class',
+          cssClass: 'loading',
           message: message,
           duration: duration,
         });
@@ -121,54 +121,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.light {
-  color: #ffffff;
-}
-
-.dark {
-  color: #000000;
-}
-
-#map { 
-  position: absolute;
-  width: 100%; 
-  height: 100vh;
-}
-
-h1 {
-  position: relative;
-  top: 31.5vh;
-  color: #000000;
-}
-
-.locationInfo {
-  position: absolute;
-  top: 1em;
-  left: 1em;
-  font-weight: bold;
-}
-
-@media screen and (max-width: 600px){
-  h1 {
-    display: none;
-  }
-  ion-fab-button {
-    margin-bottom: 2em;
-  }
-  .locationInfo {
-    width: 60vw;
-  }
-}
-
-</style>

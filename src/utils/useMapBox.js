@@ -2,6 +2,19 @@ import keys from '../config/keys';
 import mapboxgl from 'mapbox-gl';
 import axios from 'axios';
 
+export const addMarker = (pos, map) => {
+  // create a HTML element for each feature
+  const el = document.createElement('div');
+  el.className = 'marker';
+  el.classList.add('pulse');
+  console.log(el);
+
+  // make a marker for each feature and add to the map
+  new mapboxgl.Marker(el)
+    .setLngLat(pos)
+    .addTo(map);
+}
+
 export const buildMap = (center, zoom, isDark, hasPosition) => {
     mapboxgl.accessToken = keys.mapBoxKey;
     const map = new mapboxgl.Map({
@@ -14,9 +27,8 @@ export const buildMap = (center, zoom, isDark, hasPosition) => {
     map.on('load', () => {
       map.resize();
     });
-    hasPosition ? new mapboxgl.Marker()
-    .setLngLat(center)
-    .addTo(map) : null;
+    hasPosition ? addMarker(center, map) : null;
+
 };
 
 export const getAddress = async (coords) => {
