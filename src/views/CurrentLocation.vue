@@ -38,7 +38,7 @@ import { IonContent, IonPage, loadingController, IonCard, IonCardContent } from 
 import { defineComponent } from 'vue';
 import { locationOutline, refresh, moon } from 'ionicons/icons';
 
-import { buildMap, getAddress, addMarker } from '../utils/useMapBox';
+import { getMap, getAddress, addMarker } from '../utils/useMapBox';
 import { getCurrentPosition } from '../utils/useLocation';
 import { socket } from '../utils/useSocket';
 
@@ -61,13 +61,17 @@ export default defineComponent({
       southAfricaCenter: [22.9375, -30.5595],
       isConnected: false,
       socketMessage: '',
-      address: ''
+      address: '',
+      map: null
     }
   },
   mounted() {
     this.presentLoading('Please wait...', 2000);
     document.body.classList.remove('dark');
-    buildMap(this.southAfricaCenter, 3, this.darkMode, this.hasPosition);
+    this.map = getMap(this.southAfricaCenter, 3, this.darkMode, 'map');
+    this.map.on('load', () => {
+      this.map.resize();
+    });
   },
   methods: {
     async locateButtonClick() {
@@ -78,12 +82,14 @@ export default defineComponent({
       const center = [position.coords.longitude, position.coords.latitude];
       socket.emit('location', center);
       this.presentLoading('locating...', 1000);
-      buildMap(center, 13, this.darkMode, this.hasPosition);
+      this.map = getMap(center, 13, this.darkMode, 'map');
+      addMarker(center, this.map);
+      this.startTracking();
     },
     reset() {
       this.presentLoading('re-initializing...', 1500);
       this.hasPosition = false;
-      buildMap(this.southAfricaCenter, 3, this.darkMode, this.hasPosition);
+      this.map = getMap(this.southAfricaCenter, 3, this.darkMode, 'map');
       setTimeout(() => {
         document.querySelector('#heading').style.color = this.darkMode ? '#ffffff' : '#000000';
       }, 800);
@@ -116,8 +122,28 @@ export default defineComponent({
         center = [this.coords.longitude, this.coords.latitude];
         zoom = 12; 
       }
-      buildMap(center, zoom, this.darkMode, this.hasPosition);
+      this.map = getMap(center, zoom, this.darkMode, 'map');
+      this.hasPosition ? addMarker(center, this.map) : null;
     },
+    startTracking() {
+      this.intervalID = setInterval( async () => {
+          const position = await getCurrentPosition();
+
+          if(this.coords.latitude !== position.coords.latitude) {
+            const center = [position.coords.longitude, position.coords.latitude];
+            this.coords = position.coords;
+            this.hasPosition = true;
+            const elem = document.querySelector('.marker');
+            elem.parentNode.removeChild(elem);
+            addMarker(center, this.map);
+            this.address = await getAddress(position.coords);
+        }
+      }, 2000);
+    }
   },
+  unmounted() {
+    clearInterval(this.intervalID);
+  }
 });
 </script>
+

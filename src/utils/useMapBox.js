@@ -13,22 +13,19 @@ export const addMarker = (pos, map) => {
   new mapboxgl.Marker(el)
     .setLngLat(pos)
     .addTo(map);
+    console.log(map);
 }
 
-export const buildMap = (center, zoom, isDark, hasPosition) => {
+export const getMap = (center, zoom, isDark, container) => {
     mapboxgl.accessToken = keys.mapBoxKey;
     const map = new mapboxgl.Map({
-      container: 'map', // container id
+      container, // container id
       style: `mapbox://styles/mapbox/${isDark ? 'dark' : 'light'}-v10`, // style URL
       center, // starting position [lng, lat]
       zoom // starting zoom
     });    
 
-    map.on('load', () => {
-      map.resize();
-    });
-    hasPosition ? addMarker(center, map) : null;
-
+    return map;
 };
 
 export const getAddress = async (coords) => {
