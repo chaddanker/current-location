@@ -87,6 +87,7 @@ export default defineComponent({
       this.startTracking();
     },
     reset() {
+      clearInterval(this.intervalID);
       this.presentLoading('re-initializing...', 1500);
       this.hasPosition = false;
       this.map = getMap(this.southAfricaCenter, 3, this.darkMode, 'map');
